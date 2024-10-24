@@ -9,8 +9,9 @@ import MOCK_DATA from "../../data/mock";
 const categories = [...new Set(MOCK_DATA.map((item) => item.category))];
 
 export default function Category({
-    onFilterByCategory,
+    onFilter,
     setFilterByProp,
+    ratingProp,
     categoryProp: category,
     setCategoryProp: setCategory,
 }) {
@@ -33,7 +34,7 @@ export default function Category({
                         key={idx}
                         value={item}
                         onClick={() => {
-                            onFilterByCategory(item.toLowerCase());
+                            onFilter(item.toLowerCase(), ratingProp);
                             setFilterByProp((prevState) => ({
                                 ...prevState,
                                 category: `Category - ${item}`,

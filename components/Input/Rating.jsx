@@ -2,8 +2,9 @@ import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { ratingCategories } from "../../src/App";
 
 export default function Rating({
-    onFilterByRating,
+    onFilter,
     setFilterByProp,
+    categoryProp,
     ratingProp: rating,
     setRatingProp: setRating,
 }) {
@@ -22,7 +23,7 @@ export default function Rating({
                         key={idx}
                         value={item}
                         onClick={() => {
-                            onFilterByRating(item);
+                            onFilter(categoryProp, item);
                             setFilterByProp((prevState) => ({
                                 ...prevState,
                                 rating: `Rating more than ${item}`,

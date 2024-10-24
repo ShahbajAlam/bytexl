@@ -3,9 +3,9 @@ import Content from "../components/Content/Content";
 import Input from "../components/Input/Input";
 import Navbar from "../components/navbar/Navbar";
 import Divider from "@mui/material/Divider";
-import MOCK_DATA from "../data/mock";
 import { Box, Typography } from "@mui/material";
 
+let MOCK_DATA;
 export const ratingCategories = [1, 2, 3, 4];
 
 function App() {
@@ -13,11 +13,6 @@ function App() {
     const [searchQuery, setSearchQuery] = useState("");
     const [rating, setRating] = useState(ratingCategories[0]);
     const [sortedBy, setSortedBy] = useState("");
-
-    // It is a good practise to check the incoming data
-    // for ensuring it is in the form of data structure
-    // we are expecting
-    // const [data, setData] = useState(Array.isArray(MOCK_DATA) ? MOCK_DATA : []);
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -26,26 +21,63 @@ function App() {
             setLoading(true);
             const response = await fetch("http://localhost:5000/api/books");
             const data = await response.json();
+            MOCK_DATA = data;
             setData(data);
             setLoading(false);
         }
         fetchData();
     }, []);
 
-    function handleSearch(query) {
+    function handleSearch(
+        query,
+        categoryLocal = category,
+        ratingLocal = rating
+    ) {
         if (!query) return;
 
-        setData(
-            MOCK_DATA?.filter((item) =>
-                // When comparing strings, it is important to make
-                // both strings either lower case or upper case
-                item?.title?.toLowerCase().includes(query)
-            ) || []
+        let searchedData = MOCK_DATA?.filter((item) =>
+            item?.title?.toLowerCase().includes(query)
         );
+
+        if (categoryLocal) {
+            searchedData = searchedData.filter(
+                (item) =>
+                    item?.category?.toLowerCase() === category?.toLowerCase()
+            );
+        }
+
+        if (ratingLocal) {
+            searchedData = searchedData.filter(
+                (item) => item?.rating >= ratingLocal
+            );
+        }
+
+        searchedData = checkSortCondition(searchedData);
+        setData(searchedData);
     }
 
     function handleReset() {
-        setData(Array.isArray(MOCK_DATA) ? MOCK_DATA : []);
+        setData(MOCK_DATA);
+    }
+
+    function checkSortCondition(dataArray) {
+        switch (sortedBy) {
+            case "Price (Low to High)":
+                dataArray = dataArray.sort((a, b) => a.price - b.price);
+                break;
+            case "Price (High to Low)":
+                dataArray = dataArray.sort((a, b) => b.price - a.price);
+                break;
+            case "Rating (Low to High)":
+                dataArray = dataArray.sort((a, b) => a.rating - b.rating);
+                break;
+            case "Rating (High to Low)":
+                dataArray = dataArray.sort((a, b) => b.rating - a.rating);
+                break;
+            default:
+                break;
+        }
+        return dataArray;
     }
 
     function handleSortByPriceAscending() {
@@ -72,91 +104,31 @@ function App() {
         });
     }
 
-    function handleFilterByCategory(category) {
-        if (searchQuery && rating) {
-            setData(
-                MOCK_DATA.filter(
-                    (item) =>
-                        item?.title?.toLowerCase().includes(searchQuery) &&
-                        item?.category?.toLowerCase() ===
-                            category?.toLowerCase() &&
-                        item?.rating >= rating
-                )
-            );
-            // to do - write using method chaining or multiple ifs
-        } else if (searchQuery) {
-            setData(
-                MOCK_DATA.filter(
-                    (item) =>
-                        item?.title?.toLowerCase().includes(searchQuery) &&
-                        item?.category?.toLowerCase() ===
-                            category?.toLowerCase()
-                )
-            );
-        } else if (rating) {
-            setData(
-                MOCK_DATA?.filter(
-                    (item) =>
-                        item?.category?.toLowerCase() ===
-                            category?.toLowerCase() && item?.rating >= rating
-                )
-            );
-        } else {
-            setData(
-                MOCK_DATA?.filter(
-                    (item) =>
-                        item?.category?.toLowerCase() ===
-                        category?.toLowerCase()
-                )
+    function handleFilterByCategoryOrRating(category = "", rating = 0) {
+        let filteredData = MOCK_DATA;
+
+        if (searchQuery) {
+            filteredData = filteredData.filter((item) =>
+                item?.title?.toLowerCase().includes(searchQuery)
             );
         }
-    }
 
-    function handleFilterByRating(rating) {
-        if (searchQuery && category) {
-            setData(
-                MOCK_DATA.filter(
-                    (item) =>
-                        item?.rating >= rating &&
-                        item?.title?.toLowerCase().includes(searchQuery) &&
-                        item?.category.toLowerCase() === category.toLowerCase()
-                )
+        if (category) {
+            filteredData = filteredData.filter(
+                (item) =>
+                    item?.category?.toLowerCase() === category?.toLowerCase()
             );
-        } else if (searchQuery) {
-            setData(
-                MOCK_DATA.filter(
-                    (item) =>
-                        item?.rating >= rating &&
-                        item?.title?.toLowerCase().includes(searchQuery)
-                )
-            );
-        } else if (category) {
-            setData(
-                MOCK_DATA.filter(
-                    (item) =>
-                        item?.rating >= rating &&
-                        item?.category.toLowerCase() === category.toLowerCase()
-                )
-            );
-        } else {
-            setData(MOCK_DATA.filter((item) => item?.rating >= rating));
         }
+
+        if (rating) {
+            filteredData = filteredData.filter(
+                (item) => item?.rating >= rating
+            );
+        }
+
+        filteredData = checkSortCondition(filteredData);
+        setData(filteredData);
     }
-
-    // function handleFilterByCategory(category) {
-    //     setData((prevData) => {
-    //         return [...prevData].filter(
-    //             (item) =>
-    //                 item?.category?.toLowerCase() === category?.toLowerCase()
-    //         );
-    //     });
-    // }
-
-    // function handleFilterByRating() {
-    //     setData((prevData) =>
-    //         [...prevData].filter((item) => item?.rating >= rating)
-    //     );
-    // }
 
     return (
         <Box id="mainContainer">
@@ -180,8 +152,7 @@ function App() {
                     onSortByPriceDesc={handleSortByPriceDescending}
                     onSortByRatingAsc={handleSortByRatingAscending}
                     onSortByRatingDesc={handleSortByRatingDescending}
-                    onFilterByCategory={handleFilterByCategory}
-                    onFilterByRating={handleFilterByRating}
+                    onFilter={handleFilterByCategoryOrRating}
                     searchQueryProp={searchQuery}
                     setSearchQueryProp={setSearchQuery}
                     ratingProp={rating}

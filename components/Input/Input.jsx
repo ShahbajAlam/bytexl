@@ -8,15 +8,13 @@ import Filter from "./Filter";
 import { ratingCategories } from "../../src/App";
 
 function Input({
-    dataProp,
     onSearch,
     onReset,
     onSortByPriceAsc,
     onSortByPriceDesc,
     onSortByRatingAsc,
     onSortByRatingDesc,
-    onFilterByCategory,
-    onFilterByRating,
+    onFilter,
     searchQueryProp,
     setSearchQueryProp,
     ratingProp,
@@ -51,8 +49,7 @@ function Input({
         <Box>
             <Box className={styles.inputContainer}>
                 <Filter
-                    onFilterByCategory={onFilterByCategory}
-                    onFilterByRating={onFilterByRating}
+                    onFilter={onFilter}
                     onReset={onReset}
                     onSearch={onSearch}
                     searchQueryProp={searchQueryProp}
@@ -75,18 +72,7 @@ function Input({
                         style={{ padding: 4 }}
                         value={searchQueryProp}
                     />
-                    <Button
-                        onClick={() => {
-                            setFilterBy({
-                                category: "",
-                                rating: "",
-                            });
-                            setSortedByProp("");
-                            setCategoryProp("");
-                            setRatingProp(ratingCategories[0]);
-                            handleSearch();
-                        }}
-                    >
+                    <Button onClick={handleSearch}>
                         <SearchIcon />
                     </Button>
                     <Button onClick={handleResetSearch}>

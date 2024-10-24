@@ -8,20 +8,16 @@ import Rating from "./Rating";
 import { ratingCategories } from "../../src/App";
 
 export default function Filter({
-    onFilterByCategory,
-    onFilterByRating,
+    onFilter,
     onReset,
     onSearch,
     searchQueryProp,
-    setSearchQueryProp,
     filterByProp,
     setFilterByProp,
     ratingProp,
     setRatingProp,
     categoryProp,
     setCategoryProp,
-    sortedByProp,
-    setSortedByProp,
 }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -63,34 +59,35 @@ export default function Filter({
                 <MenuItem>
                     <Category
                         categoryProp={categoryProp}
+                        ratingProp={ratingProp}
                         setCategoryProp={setCategoryProp}
-                        onFilterByCategory={onFilterByCategory}
+                        onFilter={onFilter}
                         setFilterByProp={setFilterByProp}
                     />
                 </MenuItem>
                 <MenuItem>
                     <Rating
-                        onFilterByRating={onFilterByRating}
+                        onFilter={onFilter}
                         setFilterByProp={setFilterByProp}
+                        categoryProp={categoryProp}
                         ratingProp={ratingProp}
                         setRatingProp={setRatingProp}
                     />
                 </MenuItem>
                 <Button
                     onClick={() => {
-                        if (searchQueryProp) {
-                            onSearch(searchQueryProp);
-                        } else {
-                            onReset();
-                        }
-                        handleClose();
                         setFilterByProp({
                             category: "",
                             rating: "",
                         });
                         setRatingProp(ratingCategories[0]);
                         setCategoryProp("");
-                        setSortedByProp("");
+                        if (searchQueryProp) {
+                            onSearch(searchQueryProp, "", 0);
+                        } else {
+                            onReset();
+                        }
+                        handleClose();
                     }}
                     style={{ display: "block", marginInline: "auto" }}
                 >
